@@ -2,8 +2,10 @@ from ste import *
 from new_utils import *
 import time
 
-from numpy.random import random
+from numpy.random import random, randn
 from Utils import center_data, getTriplets
+
+import sys
 
 def triplet_algorithms(f, 
                        S,
@@ -91,9 +93,9 @@ def triplet_algorithms(f,
 
         # print('EMPIRICAL ERROR', emp_X_new)
         stats['emp'].append(emp_X_new)
-        print(iteration, 'LOG ERROR', log_X_new)        
         stats['log'].append(log_X_new)
-
+        print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+        
         # accuracy achieved
         if stats['emp'][-1] < epsilon:
             print('Accuracy reached in {} iterations'.format(iteration))
@@ -106,17 +108,17 @@ def triplet_algorithms(f,
                 break
                 
         # No substantial increase in last ten guys
-        # has to run for atleast 10 iterations
-        if iteration > 10:
-            smallest = min(stats['log'][::-1][:10])
-            biggest = max(stats['log'][::-1][:10])                        
+        # has to run for atleast 20 iterations
+        if iteration > 20:
+            smallest = min(stats['log'][::-1][:10]) # last ten guys
+            biggest = max(stats['log'][::-1][:10])  # last ten guys             
             if abs(smallest - biggest) < toler:
                 print('No progress')
                 break
         
         # divergence : currently very ad hoc
-            smallest = min(stats['log'][::-1][:3])
-            biggest = max(stats['log'][::-1][:3])                        
+            smallest = min(stats['log'][::-1][:10]) # last 10 guys
+            biggest = max(stats['log'][::-1][:10])  # last 10 guys                
             if abs(smallest - biggest) > 1:
                 print('Divergence')
                 stats['status'] = -1
@@ -144,16 +146,69 @@ if __name__ == '__main__':
     n,d = X.shape
     pulls = 1000
     triplets, error = getTriplets(X, pulls)
-    
-    X0 = random((n,d))
-    # X0 = X
-    print(ste_loss(X0, triplets, 1))
-    stats = triplet_algorithms(ste_loss,
-                               triplets,
-                               X0,
-                               d,
-                               'full_grad',
-                               0.5,
-                               iters=500,
-                               epsilon = 0.001,
-                               proj=None)
+
+    if sys.argv[1] == '1':
+        X0 = random((n,d))
+        # X0 = X
+        stats = triplet_algorithms(ste_loss,
+                                   triplets,
+                                   X0,
+                                   d,
+                                   'full_grad',
+                                   10,
+                                   iters=500,
+                                   epsilon = 0.001,
+                                   proj=None)
+        
+    if sys.argv[1] == '2':
+        M0 = randn(n,n)
+        stats1 = triplet_algorithms(ste_loss_convex, 
+                                    triplets,
+                                    M0,                       
+                                    d,                            
+                                    'full_grad', 
+                                    30,
+                                    iters=5000,
+                                    epsilon = 0.01,
+                                    proj=projected)
+
+        print()
+        
+        stats2 = triplet_algorithms(ste_loss_convex, 
+                                    triplets,
+                                    M0,                       
+                                    d,                            
+                                    'sgd', 
+                                    3,
+                                    iters=5000,
+                                    epsilon = 0.01,
+                                    proj=projected)
+        
+
+    if sys.argv[1] == 'all':
+        X0 = random((n,d))
+        # X0 = X
+        print(ste_loss(X0, triplets, 1))
+        stats = triplet_algorithms(ste_loss,
+                                   triplets,
+                                   X0,
+                                   d,
+                                   'full_grad',
+                                   10,
+                                   iters=500,
+                                   epsilon = 0.001,
+                                   proj=None)
+
+        print()
+        
+        M0 = randn(n,n)
+        stats2 = triplet_algorithms(ste_loss_convex, 
+                                    triplets,
+                                    M0,                       
+                                    d,                            
+                                    'full_grad', 
+                                    0,
+                                    iters=500,
+                                    epsilon = 0.01,
+                                    proj=projected)
+        

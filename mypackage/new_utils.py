@@ -88,6 +88,6 @@ def SGD_X(f, X, S):
 
     q = S[ind]
 
-    return f(X, q, 2)
+    return -1*f(X, q, 2)
 
 
