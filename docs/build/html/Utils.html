@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Utils module &mdash; Triplets 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Triplets 0.1 documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-Utils">
+<span id="utils-module"></span><h1>Utils module<a class="headerlink" href="#module-Utils" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="Utils.center_data">
+<code class="descclassname">Utils.</code><code class="descname">center_data</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.center_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a matrix of coordinates X, center the matrix around 0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>nxd numpy array</em>) &#8211; Matrix to be centred.</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:
+X = center_data(X)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Utils.getRandomQuery">
+<code class="descclassname">Utils.</code><code class="descname">getRandomQuery</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.getRandomQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs a triplet [i,j,k] chosen uniformly at random from all possible triplets     and score = abs( ||x_i - x_k||^2 - ||x_j - x_k||^2 )</p>
+<dl class="docutils">
+<dt>Inputs:</dt>
+<dd>n (integer) : total number of points in emebedding</dd>
+<dt>Outputs:</dt>
+<dd>[(int) i, (int) j, (int) k] q : where k in [n], i in [n]-k, j in [n]-k-j</dd>
+<dt>Usage:</dt>
+<dd>q = getRandomQuery(X)</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Utils.getTripletScore">
+<code class="descclassname">Utils.</code><code class="descname">getTripletScore</code><span class="sig-paren">(</span><em>X</em>, <em>q</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.getTripletScore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given X,q=[i,j,k] returns $score = ||x_i - x_k||^2 - ||x_j - x_k||^2$</p>
+<p>If score &lt; 0 then the triplet agrees with the embedding, otherwise it does not 
+i.e i is closer to k than k</p>
+<dl class="docutils">
+<dt>Usage:</dt>
+<dd>score = getTripletScore(X,[3,4,5])</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Utils.getTriplets">
+<code class="descclassname">Utils.</code><code class="descname">getTriplets</code><span class="sig-paren">(</span><em>X</em>, <em>pulls</em>, <em>shift=1</em>, <em>steepness=1</em>, <em>noise=False</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.getTriplets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a random set of #pulls triplets
+Params:
+X    : The true embedding that preserves all the triplet comparisons
+pull : number of triplets comparison
+shift : first measure noise (click bias)
+steepness : second measure of noise</p>
+<p>Returns: 
+S : list of lists of indices which represent triplets as</p>
+<blockquote>
+<div>[i,j,k] - i winner(closer to k), j is loser(further from k) 
+and center.</div></blockquote>
+<dl class="docutils">
+<dt>error: In noise model are the percentage of bad triplets. In the noiseless</dt>
+<dd>case it should be 0.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Utils.onedplot">
+<code class="descclassname">Utils.</code><code class="descname">onedplot</code><span class="sig-paren">(</span><em>Xtrue</em>, <em>Xhat</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.onedplot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Utils.procrustes">
+<code class="descclassname">Utils.</code><code class="descname">procrustes</code><span class="sig-paren">(</span><em>X</em>, <em>Y</em>, <em>scaling=True</em>, <em>reflection='best'</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.procrustes" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="http://stackoverflow.com/questions/18925181/procrustes-analysis-with-numpy">http://stackoverflow.com/questions/18925181/procrustes-analysis-with-numpy</a>
+A port of MATLAB&#8217;s <cite>procrustes</cite> function to Numpy.</p>
+<p>Procrustes analysis determines a linear transformation (translation,
+reflection, orthogonal rotation and scaling) of the points in Y to best
+conform them to the points in matrix X, using the sum of squared errors
+as the goodness of fit criterion.</p>
+<blockquote>
+<div>d, Z, [tform] = procrustes(X, Y)</div></blockquote>
+<dl class="docutils">
+<dt>X, Y    </dt>
+<dd>matrices of target and input coordinates. they must have equal
+numbers of  points (rows), but Y may have fewer dimensions
+(columns) than X.</dd>
+<dt>scaling </dt>
+<dd>if False, the scaling component of the transformation is forced
+to 1</dd>
+<dt>reflection</dt>
+<dd>if &#8216;best&#8217; (default), the transformation solution may or may not
+include a reflection component, depending on which fits the data
+best. setting reflection to True or False forces a solution with
+reflection or no reflection respectively.</dd>
+</dl>
+<dl class="docutils">
+<dt>d       </dt>
+<dd>the residual sum of squared errors, normalized according to a
+measure of the scale of X, ((X - X.mean(0))**2).sum()</dd>
+<dt>Z</dt>
+<dd>the matrix of transformed Y-values</dd>
+<dt>tform   </dt>
+<dd>a dict specifying the rotation, translation and scaling that
+maps X &#8211;&gt; Y</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Utils.randint">
+<code class="descclassname">Utils.</code><code class="descname">randint</code><span class="sig-paren">(</span><em>low</em>, <em>high=None</em>, <em>size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.randint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return random integers from <cite>low</cite> (inclusive) to <cite>high</cite> (exclusive).</p>
+<p>Return random integers from the &#8220;discrete uniform&#8221; distribution in the
+&#8220;half-open&#8221; interval [<cite>low</cite>, <cite>high</cite>). If <cite>high</cite> is None (the default),
+then results are from [0, <cite>low</cite>).</p>
+<dl class="docutils">
+<dt>low <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Lowest (signed) integer to be drawn from the distribution (unless
+<code class="docutils literal"><span class="pre">high=None</span></code>, in which case this parameter is the <em>highest</em> such
+integer).</dd>
+<dt>high <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
+<dd>If provided, one above the largest (signed) integer to be drawn
+from the distribution (see above for behavior if <code class="docutils literal"><span class="pre">high=None</span></code>).</dd>
+<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">int or tuple of ints, optional</span></dt>
+<dd>Output shape.  If the given shape is, e.g., <code class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></code>, then
+<code class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></code> samples are drawn.  Default is None, in which case a
+single value is returned.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">int or ndarray of ints</span></dt>
+<dd><cite>size</cite>-shaped array of random integers from the appropriate
+distribution, or a single such random int if <cite>size</cite> not provided.</dd>
+</dl>
+<dl class="docutils">
+<dt>random.random_integers <span class="classifier-delimiter">:</span> <span class="classifier">similar to <cite>randint</cite>, only for the closed</span></dt>
+<dd>interval [<cite>low</cite>, <cite>high</cite>], and 1 is the lowest value if <cite>high</cite> is
+omitted. In particular, this other one is the one to use to generate
+uniformly distributed discrete non-integers.</dd>
+</dl>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">array([1, 0, 0, 0, 1, 1, 0, 0, 1, 0])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])</span>
+</pre></div>
+</div>
+<p>Generate a 2 x 4 array of ints between 0 and 4, inclusive:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="go">array([[4, 0, 2, 1],</span>
+<span class="go">       [3, 2, 2, 0]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="Utils.twodplot">
+<code class="descclassname">Utils.</code><code class="descname">twodplot</code><span class="sig-paren">(</span><em>X</em>, <em>Y</em><span class="sig-paren">)</span><a class="headerlink" href="#Utils.twodplot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Utils.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Ari Biswas, Blake Mason.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/Utils.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
