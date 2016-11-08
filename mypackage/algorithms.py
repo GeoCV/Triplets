@@ -2,6 +2,8 @@ from ste import *
 from new_utils import *
 import time
 
+from numpy.random import random
+from Utils import center_data, getTriplets
 
 def triplet_algorithms(f, 
                        S,
@@ -11,6 +13,7 @@ def triplet_algorithms(f,
                        step_size_func,
                        iters=100,
                        epsilon = 0.001,
+                       toler= 10**-5,
                        proj=None):
 
     '''
@@ -24,6 +27,9 @@ def triplet_algorithms(f,
     :param descent_alg: choice for descent method (e.g. full_gradient/sgd etc.)
     :param iters: number of iterations
     :param epsilon: Accuracy parameter
+    :param tolerance: Tolerance parameter
+    :param proj: Variable to decide if we should project or not.
+
     :type f: python function with specific structure
     :type S: list of lists
     :type X0: a d dimensional vector
@@ -31,14 +37,17 @@ def triplet_algorithms(f,
     :type descent_alg: function
     :type iters: int
     :type epsilon: int
+    :type toler: float
+    :type proj: Boolean
     '''    
-    
+
+    # Stats I wish to collect about my experiment
     stats = {}    
-    stats['emp'] = []
-    stats['log'] = []
-    stats['time_per_iter'] = []
-    stats['avg_time_per_iter'] = 0    
-    stats['status'] = 0
+    stats['emp'] = [] # list of empirical loss per iteration
+    stats['log'] = [] # list of log loss per iteration
+    stats['time_per_iter'] = [] # list of times taken per iteration
+    stats['avg_time_per_iter'] = 0  # mean time for single iteration
+    stats['status'] = 0 # convergence status
     
     X_curr = X0
     emp_X_curr = f(X0, S, 1)['empirical_loss']
@@ -53,33 +62,41 @@ def triplet_algorithms(f,
     if stats['emp'][-1] < epsilon:
         return stats
             
-    for i in range(iters):    
-        
+    for iteration in range(iters):    
+
         start = time.time()
         
-        p = f(X_curr, S, 2)[descent_alg] 
+        p = f(X_curr, S, 2, descent_alg=descent_alg)
         alpha = step_size_func #  for now constant stepsize only 
-        
-        try:
-            X_new = X_curr + alpha*p
+
+        flag = False
+        while flag == False:
+            try:
+                X_new = X_curr + alpha*p
+
+                if proj != None:
+                    X_new = proj(X_new, d)
             
-            if proj != None:
-                X_new = proj(X_new, d)
-            
-            emp_X_new = f(X_new, S, 1)['empirical_loss']
-            log_X_new = f(X_new, S, 1)['log_loss']
-            
-        except OverflowError:
-            print('Step size too big: math range overflow',i)
-            stats['status'] = -1
-            break
-            
+                emp_X_new = f(X_new, S, 1)['empirical_loss']
+                log_X_new = f(X_new, S, 1)['log_loss']
+
+                flag = True
+                
+            except OverflowError:
+
+                print('Step size too big: math range overflow',iteration)
+                stats['status'] = -1
+                alpha /=2
+                flag == False
+
+        # print('EMPIRICAL ERROR', emp_X_new)
         stats['emp'].append(emp_X_new)
+        print(iteration, 'LOG ERROR', log_X_new)        
         stats['log'].append(log_X_new)
 
         # accuracy achieved
         if stats['emp'][-1] < epsilon:
-            print('Accuracy reached in {} iterations'.format(i))
+            print('Accuracy reached in {} iterations'.format(iteration))
             break
             
         # gradient is very very small
@@ -90,14 +107,14 @@ def triplet_algorithms(f,
                 
         # No substantial increase in last ten guys
         # has to run for atleast 10 iterations
-        if i > 10:
+        if iteration > 10:
             smallest = min(stats['log'][::-1][:10])
             biggest = max(stats['log'][::-1][:10])                        
-            if abs(smallest - biggest) < 10**-5:
+            if abs(smallest - biggest) < toler:
                 print('No progress')
                 break
         
-        # divergence 
+        # divergence : currently very ad hoc
             smallest = min(stats['log'][::-1][:3])
             biggest = max(stats['log'][::-1][:3])                        
             if abs(smallest - biggest) > 1:
@@ -109,7 +126,34 @@ def triplet_algorithms(f,
         stats['time_per_iter'].append((end - start))
         X_curr = X_new
     
-    stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(i+1)
+    stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(iteration+1)
     stats['embedding'] = X_curr
     
     return stats        
+
+
+
+if __name__ == '__main__':
+
+    #Create data
+    dimensions= 15
+    number_of_points= 100
+
+    X = random((number_of_points, dimensions))
+    X = center_data(X)
+    n,d = X.shape
+    pulls = 1000
+    triplets, error = getTriplets(X, pulls)
+    
+    X0 = random((n,d))
+    # X0 = X
+    print(ste_loss(X0, triplets, 1))
+    stats = triplet_algorithms(ste_loss,
+                               triplets,
+                               X0,
+                               d,
+                               'full_grad',
+                               0.5,
+                               iters=500,
+                               epsilon = 0.001,
+                               proj=None)

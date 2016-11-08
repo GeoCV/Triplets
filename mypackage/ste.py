@@ -16,7 +16,7 @@ def ste_loss_triplet(X, q, opt):
         triplet_score = scoreX(X, q, 1)   
         return logistic_loss(triplet_score, opt)*scoreX(X,q, opt)
 
-def ste_loss(X, S, opt):
+def ste_loss(X, S, opt, descent_alg='full_grad'):
     
     if opt == 1:
         emp_loss = 0
@@ -36,12 +36,16 @@ def ste_loss(X, S, opt):
            }
 
     elif opt == 2:
+        if descent_alg == 'full_grad':            
+            full_grad = fullGD_X(ste_loss_triplet, X, S)    
+            return full_grad
 
-        full_grad = fullGD_X(ste_loss_triplet, X, S)
-        return {'full_grad': full_grad
-           }
+        if descent_alg == 'sgd':
+            sgd = SGD_X(ste_loss_triplet, X, S)
+            return sgd
+        return None
 
-    
+
 def ste_loss_triplet_gram(M, q, opt):
 
     # Logistic loss of triplet score
@@ -55,7 +59,7 @@ def ste_loss_triplet_gram(M, q, opt):
         return logistic_loss(triplet_score, opt)*scoreM(M,q, opt)
     
 
-def ste_loss_convex(M, S, opt):
+def ste_loss_convex(M, S, opt, descent_alg='full_grad'):
 
     if opt == 1:
         emp_loss = 0
@@ -78,6 +82,14 @@ def ste_loss_convex(M, S, opt):
     
 
     elif opt == 2:
-        full_grad = fullGD_X(ste_loss_triplet_gram, M, S)
-        return {'full_grad': full_grad
-           }
+        if descent_alg == 'full_grad':            
+            full_grad = fullGD_X(ste_loss_triplet_gram, M, S)
+            return full_grad
+
+        if descent_alg == 'sgd':            
+            sgd = SGD_X(ste_loss_triplet_gram, M, S)
+            return sgd
+        
+        return None
+        
+

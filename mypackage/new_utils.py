@@ -1,6 +1,7 @@
 from math import exp, log
 from numpy.linalg import norm, eigh
 from numpy import mat, dot, zeros, diag
+from numpy.random import randint
 #-------------------------------------------------------------------
 # Basic loss and scoring functions
 #-------------------------------------------------------------------
@@ -8,7 +9,11 @@ from numpy import mat, dot, zeros, diag
 def logistic_loss(x, opt):
     
     if opt == 1:
-        return log(1 + exp(x))
+
+        loss = log(1 + exp(x))            
+            
+        return loss
+    
     
     # Gradient
     elif opt == 2:
@@ -75,3 +80,14 @@ def fullGD_X(f, X, S):
     for q in S:
         G += f(X, q, 2)
     return -1*G/len(S)  
+
+
+def SGD_X(f, X, S):
+
+    ind = randint(len(S))
+
+    q = S[ind]
+
+    return f(X, q, 2)
+
+
