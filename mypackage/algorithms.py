@@ -16,7 +16,8 @@ def triplet_algorithms(f,
                        iters=100,
                        epsilon = 0.001,
                        toler= 10**-5,
-                       proj=None):
+                       proj=None,
+                       debug=False):
 
     '''
     File contains the main triplets algorithm [still needs work]
@@ -94,7 +95,8 @@ def triplet_algorithms(f,
         # print('EMPIRICAL ERROR', emp_X_new)
         stats['emp'].append(emp_X_new)
         stats['log'].append(log_X_new)
-        print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+        if debug:
+            print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
         
         # accuracy achieved
         if stats['emp'][-1] < epsilon:
@@ -130,6 +132,7 @@ def triplet_algorithms(f,
     
     stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(iteration+1)
     stats['embedding'] = X_curr
+
     
     return stats        
 
