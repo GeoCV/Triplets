@@ -77,13 +77,7 @@ def triplet_algorithms(f,
         
         p = f(X_curr, S, 2, descent_alg=descent_alg)
 
-        # Shrink every epoch
-        if iteration %n == 0:
-            stats['epoch_count'] += 1
-            alpha = 0.9*alpha
-            if debug:
-                print('Shrinking alpha', alpha)
-        
+                        
         flag = False
         while flag == False:
             try:
@@ -117,7 +111,7 @@ def triplet_algorithms(f,
         stats['log'].append(log_X_new)
         stats['emp'].append(emp_X_new)
                 
-        if debug:
+        if debug and descent_alg=='full_grad':
             print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
         
         # accuracy achieved
@@ -154,13 +148,23 @@ def triplet_algorithms(f,
                 print('Divergence')
                 stats['status'] = -1
                 break
-        
+
+        # Shrink every epoch: put function increase check here!
+        if iteration %n == 0:
+            stats['epoch_count'] += 1
+            alpha = 0.9*alpha
+            if debug and descent_alg=='sgd':
+                print('Shrinking alpha', alpha)
+                print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+            
         end = time.time()
         stats['time_per_iter'].append((end - start))
         X_curr = X_new
     
     stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(iteration+1)
     stats['embedding'] = X_curr
+
+    print('Exiting')
     
     return stats        
 
@@ -184,7 +188,7 @@ if __name__ == '__main__':
                            d,
                            'sgd', 
                            0.1,
-                           iters=500,
+                           iters=5000,
                            epsilon = 0.01,
                            proj=None,
                            debug=True
