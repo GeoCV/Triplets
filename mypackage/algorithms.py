@@ -53,12 +53,12 @@ def triplet_algorithms(f,
     stats['time_per_iter'] = [] # list of times taken per iteration
     stats['avg_time_per_iter'] = 0  # mean time for single iteration
     stats['status'] = 0 # convergence status
+    stats['epoch_count'] = 0
     
     X_curr = X0
     emp_X_curr = f(X0, S, 1)['empirical_loss']
     log_X_curr = f(X0, S, 1)['log_loss']
 
-    print(emp_X_curr)
     stats['emp'].append(emp_X_curr)
     stats['log'].append(log_X_curr)
 
@@ -79,6 +79,7 @@ def triplet_algorithms(f,
 
         # Shrink every epoch
         if iteration %n == 0:
+            stats['epoch_count'] += 1
             alpha = 0.9*alpha
             if debug:
                 print('Shrinking alpha', alpha)
@@ -95,17 +96,12 @@ def triplet_algorithms(f,
                 log_X_new = f(X_new, S, 1)['log_loss']
                 
                 if iteration > 4:        
-                    # divergence : currently very ad hoc
-                    smallest = min(stats['log'][::-1][:3]) # last 10 guys
-                    biggest = max(stats['log'][::-1][:3])  # last 10 guys
+                    biggest = max(stats['log'][::-1][:3])  # last 3 guys
 
-                    smallest_ind = argmin(stats['log'][::-1][:3]) # last 10 guys
-                    biggest_ind = argmax(stats['log'][::-1][:3])  # last 10 guys                
-
-                    # function value has changed greatly and the function is increaseing
+                    # function is increaseing compared to last 3 iterates
+                    # update last guy to be present guy and re-do the whole thing                    
                     if log_X_new - biggest > 0.05:
-                        print(stats['log'][::-1][:3])
-                        stats['log'][-1] = log_X_new                        
+                        stats['log'][-1] = log_X_new 
                         stats['status'] = -1
                         raise OverflowError
 
@@ -132,6 +128,7 @@ def triplet_algorithms(f,
         # gradient is very very small
         if descent_alg == 'full_grad' or descent_alg == 'sgd':
             if norm(p) < 10**-6:
+                stats['status'] = 0                
                 print('Gradient too small')
                 break
                 
@@ -142,6 +139,7 @@ def triplet_algorithms(f,
             biggest = max(stats['log'][::-1][:10])  # last ten guys             
             if abs(smallest - biggest) < toler:
                 print('No progress')
+                stats['status'] = 0                
                 break
         
             # divergence : currently very ad hoc
