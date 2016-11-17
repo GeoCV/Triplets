@@ -3,7 +3,7 @@ from scipy import linalg
 import matplotlib.pyplot as plt
 
 from numpy import dot
-from numpy.random import randint
+from numpy.random import randint, rand 
 from numpy.linalg import norm
 
 import random
@@ -76,7 +76,7 @@ def getTriplets(X,pulls,shift=1,steepness=1,noise=False):
             q = [q[i] for i in [1,0,2]]
         # add some noise
         if noise:
-            if rand() > 1/(shift+exp(steepness*getTripletScore(X,q))):
+            if rand() > 1/(shift+np.exp(steepness*getTripletScore(X,q))):
                 q = [ q[i] for i in [1,0,2]]
                 error+=1
         S.append(q)   
@@ -169,15 +169,15 @@ def procrustes(X, Y, scaling=True, reflection='best'):
     ssX = (X0**2.).sum()
     ssY = (Y0**2.).sum()
     # centred Frobenius norm
-    normX = sqrt(ssX)
-    normY = sqrt(ssY)
+    normX = np.sqrt(ssX)
+    normY = np.sqrt(ssY)
     # scale to equal (unit) norm
     X0 /= normX
     Y0 /= normY
     print(n,m)
     print(ny,my)
     if my < m:
-        Y0 = concatenate((Y0, zeros(n, m-my)),0)
+        Y0 = np.concatenate((Y0, zeros(n, m-my)),0)
     # optimum rotation matrix of Y
     A = dot(X0.T, Y0)
     U,s,Vt = linalg.svd(A,full_matrices=False)
