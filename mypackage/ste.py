@@ -44,8 +44,11 @@ def ste_loss(X, S, opt, descent_alg='full_grad', svrg_full_grad=None, svrg_point
             return sgd
 
         if descent_alg == 'svrg':
+
             svrg = SVRG_X(f, X, S, full_grad=svrg_full_grad, y=svrg_point)
             return svrg
+
+
         return None
 
 

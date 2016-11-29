@@ -14,6 +14,20 @@ A file with helper functions common accross
 all algorithms
 '''
 
+def transform_MtoX(M, d):
+    '''
+    Get a set of points X in R^d back from a Gram Matrix
+    '''
+    n = M.shape[0]
+    U,s,V = np.linalg.svd(M)
+    
+    for i in range(d, n):
+        s[i] = 0
+    s = np.diag(s)
+    Mp = np.dot(np.dot(U.real,s),V.real.transpose())
+    X = np.dot(U.real,np.sqrt(s).real)
+    return Mp,X[:,0:d]
+
 def center_data(X):
     '''
     Given a matrix of coordinates X, center the matrix around 0
@@ -174,8 +188,6 @@ def procrustes(X, Y, scaling=True, reflection='best'):
     # scale to equal (unit) norm
     X0 /= normX
     Y0 /= normY
-    print(n,m)
-    print(ny,my)
     if my < m:
         Y0 = np.concatenate((Y0, zeros(n, m-my)),0)
     # optimum rotation matrix of Y
