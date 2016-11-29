@@ -70,14 +70,39 @@ def triplet_algorithms(f,
     alpha = step_size_func #  for now constant stepsize only
 
     n = len(X0)
-    
+
+    # EPOCHS
     for iteration in range(iters):    
 
         start = time.time()
-        
-        p = f(X_curr, S, 2, descent_alg=descent_alg)
 
-                        
+        if descent_alg == 'sgd':
+            # Shrink every epoch
+            if iteration %n == 0:
+                stats['epoch_count'] += 1
+                alpha = 0.9*alpha
+                
+                if debug and descent_alg=='sgd':
+                    print('Shrinking alpha', alpha)
+                    print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+
+            # Get descent direction: Currently all the work for FG and sgd
+            # need to fit SVRG in this frameworks
+            p = f(X_curr, S, 2, descent_alg=descent_alg)
+                    
+        elif descent_alg == 'full_grad':
+            stats['epoch_count'] += 1
+            alpha = 0.98*alpha
+
+            # Get descent direction: Currently all the work for FG and sgd
+            # need to fit SVRG in this frameworks
+            p = f(X_curr, S, 2, descent_alg=descent_alg)
+
+        elif descent_alg == 'svrg':
+
+            # Need to find a new descent direction now for SVRFG
+
+        # Make sure we get the step size correct
         flag = False
         while flag == False:
             try:
@@ -108,6 +133,7 @@ def triplet_algorithms(f,
                 alpha /=2
                 flag == False
 
+        # Step size found
         stats['log'].append(log_X_new)
         stats['emp'].append(emp_X_new)
                 
@@ -149,13 +175,6 @@ def triplet_algorithms(f,
                 stats['status'] = -1
                 break
 
-        # Shrink every epoch: put function increase check here!
-        if iteration %n == 0:
-            stats['epoch_count'] += 1
-            alpha = 0.9*alpha
-            if debug and descent_alg=='sgd':
-                print('Shrinking alpha', alpha)
-                print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
             
         end = time.time()
         stats['time_per_iter'].append((end - start))
@@ -186,8 +205,8 @@ if __name__ == '__main__':
                            triplets,
                            X0,                       
                            d,
-                           'sgd', 
-                           0.1,
+                           'full_grad', 
+                           10,
                            iters=5000,
                            epsilon = 0.01,
                            proj=None,

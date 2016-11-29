@@ -1,7 +1,6 @@
 from math import exp, log
 from numpy.linalg import norm
 from numpy import zeros
-
 from new_utils import *
 
 def ste_loss_triplet(X, q, opt):
@@ -41,11 +40,15 @@ def ste_loss(X, S, opt, descent_alg='full_grad'):
             return full_grad
 
         if descent_alg == 'sgd':
-            sgd = SGD_X(ste_loss_triplet, X, S)
+            sgd = SGD_X(ste_loss_triplet, X, S)            
             return sgd
+
+        if descent_alg = 'svrg':
+            pass
         return None
 
 
+#-----------------------------CONVEX-------------------------------------
 def ste_loss_triplet_gram(M, q, opt):
 
     # Logistic loss of triplet score

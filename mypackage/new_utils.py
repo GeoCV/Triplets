@@ -91,3 +91,6 @@ def SGD_X(f, X, S):
     return -1*f(X, q, 2)
 
 
+def SVRG_X(f, X, S):
+
+    pass
