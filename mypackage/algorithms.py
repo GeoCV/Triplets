@@ -56,6 +56,9 @@ def triplet_algorithms(f,
     stats['epoch_count'] = 0
     
     X_curr = X0
+    X_tilde = X0
+    p_full = f(X_tilde, S, 2, descent_alg='full_grad')
+    print('Done')
     emp_X_curr = f(X0, S, 1)['empirical_loss']
     log_X_curr = f(X0, S, 1)['log_loss']
 
@@ -72,7 +75,7 @@ def triplet_algorithms(f,
     n = len(X0)
 
     # EPOCHS
-    for iteration in range(iters):    
+    for iteration in range(1,iters):    
 
         start = time.time()
 
@@ -82,7 +85,7 @@ def triplet_algorithms(f,
                 stats['epoch_count'] += 1
                 alpha = 0.9*alpha
                 
-                if debug and descent_alg=='sgd':
+                if debug:
                     print('Shrinking alpha', alpha)
                     print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
 
@@ -99,9 +102,28 @@ def triplet_algorithms(f,
             p = f(X_curr, S, 2, descent_alg=descent_alg)
 
         elif descent_alg == 'svrg':
+            # Need to find a new descent direction now for SVRG
+            # Shrink every epoch
 
-            # Need to find a new descent direction now for SVRFG
-
+            if iteration % n == 0:
+                # currently using the last guy from the that comes out
+                X_tilde = X_curr # update the variance reduction guy
+                p_full = f(X_tilde, S, 2, descent_alg='full_grad')
+                alpha = 0.9*alpha
+                if debug:
+                    # print('Here')
+                    # print('Shrinking alpha', alpha)
+                    print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+                
+            # call the SVRG function you've written to get new direction
+            # svrg(X_curr, S, p_full, X_tilde)
+            p = f(X,
+                  S,
+                  2,
+                  descent_alg='full_grad',
+                  svrg_full_grad= p_full,
+                  svrg_point= X_tilde)
+            
         # Make sure we get the step size correct
         flag = False
         while flag == False:
@@ -137,8 +159,8 @@ def triplet_algorithms(f,
         stats['log'].append(log_X_new)
         stats['emp'].append(emp_X_new)
                 
-        if debug and descent_alg=='full_grad':
-            print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+        # if debug and (descent_alg=='full_grad' or descent_alg == 'svrg'):
+        #     print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
         
         # accuracy achieved
         if stats['emp'][-1] < epsilon:
@@ -155,8 +177,9 @@ def triplet_algorithms(f,
         # No substantial increase in last ten guys
         # has to run for atleast 20 iterations
         if iteration > 20:
-            smallest = min(stats['log'][::-1][:10]) # last ten guys
-            biggest = max(stats['log'][::-1][:10])  # last ten guys             
+            num = 50
+            smallest = min(stats['log'][::-1][:num]) # last ten guys
+            biggest = max(stats['log'][::-1][:num])  # last ten guys             
             if abs(smallest - biggest) < toler:
                 print('No progress')
                 stats['status'] = 0                
@@ -205,8 +228,8 @@ if __name__ == '__main__':
                            triplets,
                            X0,                       
                            d,
-                           'full_grad', 
-                           10,
+                           'sgd', 
+                           0.1,
                            iters=5000,
                            epsilon = 0.01,
                            proj=None,

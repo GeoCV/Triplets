@@ -91,6 +91,15 @@ def SGD_X(f, X, S):
     return -1*f(X, q, 2)
 
 
-def SVRG_X(f, X, S):
+def SVRG_X(f, X, S, full_grad=None, y=None):
 
-    pass
+    '''
+    y: The time I did full gradient descent, that point
+    '''
+    ind = randint(len(S))
+
+    q = S[ind]
+
+    return -1*(f(X, q, 2) - f(y, q, 2) + full_grad)
+    
+

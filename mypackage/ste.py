@@ -15,7 +15,7 @@ def ste_loss_triplet(X, q, opt):
         triplet_score = scoreX(X, q, 1)   
         return logistic_loss(triplet_score, opt)*scoreX(X,q, opt)
 
-def ste_loss(X, S, opt, descent_alg='full_grad'):
+def ste_loss(X, S, opt, descent_alg='full_grad', svrg_full_grad=None, svrg_point=None):
     
     if opt == 1:
         emp_loss = 0
@@ -43,8 +43,9 @@ def ste_loss(X, S, opt, descent_alg='full_grad'):
             sgd = SGD_X(ste_loss_triplet, X, S)            
             return sgd
 
-        if descent_alg = 'svrg':
-            pass
+        if descent_alg == 'svrg':
+            svrg = SVRG_X(f, X, S, full_grad=svrg_full_grad, y=svrg_point)
+            return svrg
         return None
 
 
