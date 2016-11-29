@@ -188,8 +188,6 @@ def procrustes(X, Y, scaling=True, reflection='best'):
     # scale to equal (unit) norm
     X0 /= normX
     Y0 /= normY
-    print(n,m)
-    print(ny,my)
     if my < m:
         Y0 = np.concatenate((Y0, zeros(n, m-my)),0)
     # optimum rotation matrix of Y

@@ -43,7 +43,7 @@ def ste_loss(X, S, opt, descent_alg='full_grad'):
             sgd = SGD_X(ste_loss_triplet, X, S)            
             return sgd
 
-        if descent_alg = 'svrg':
+        if descent_alg == 'svrg':
             pass
         return None
 
