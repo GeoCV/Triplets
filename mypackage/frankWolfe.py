@@ -37,7 +37,7 @@ def frankWolfe(X0, S, maxits=100, epsilon=1e-3, debug=False):
         M_old = M
         alpha = 10/(it + 2)                      # heuristic step size
         G = ste_loss_convex(M, S, 2, descent_alg='full_grad')
-        _, v = eigs(-1.*G, k=1)                     # get largest eigenvalue
+        _, v = eigs(G, k=1)                     # get largest eigenvalue
         M = M + alpha*(np.outer(v,v) - M)       # perform rank-1 update
         end = time()                            # end time
 
@@ -72,12 +72,12 @@ if __name__ == '__main__':
     d = 2
     Xtrue = Utils.center_data(np.random.rand(n,d))
     pulls = int(10*n*d*np.log(n))
-    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=True)
+    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=False)
     print("estiamted best error is: %f" %bayes_err)
     X0 = Utils.center_data(np.random.rand(n,d))
     Xhat, stats = frankWolfe(X0, S, debug=True)
 
-    _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
-    Utils.twodplot(Xtrue, Xpro)
-    plt.show()
+    # _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
+    # Utils.twodplot(Xtrue, Xpro)
+    # plt.show()
 
