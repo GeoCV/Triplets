@@ -2,12 +2,12 @@ from ste import *
 from new_utils import *
 
 import numpy as np 
-from scipy.sparse.linalg import eigs 
+from scipy.sparse.linalg import eigsh 
 import Utils
 from time import time 
 import matplotlib.pyplot as plt
 
-def frankWolfe(X0, S, maxits=100, epsilon=1e-3, debug=False):
+def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
     """
     Inputs:
     (ndarray) X0: initial embedding
@@ -35,11 +35,25 @@ def frankWolfe(X0, S, maxits=100, epsilon=1e-3, debug=False):
     while it < maxits and (dif > epsilon and Gnorm > epsilon):
         start = time()                           # start time
         M_old = M
-        alpha = 10/(it + 2)                      # heuristic step size
         G = ste_loss_convex(M, S, 2, descent_alg='full_grad')
-        _, v = eigs(G, k=1)                     # get largest eigenvalue
-        M = M + alpha*(np.outer(v,v) - M)       # perform rank-1 update
-        end = time()                            # end time
+
+        # Frank-Wolfe method
+        if method=='FW':        
+            alpha = 5/np.sqrt(it + 2)                      # heuristic step size
+            _, v = eigsh(-1.*G, k=1, maxiter=200)          # get largest eigenvalue
+            # _, V = np.linalg.eigh(-1.*G)
+            # v = V[:,0]       # leading eigenvector
+            M = M + alpha*(np.outer(v,v) - M)            # perform rank-1 update
+
+        elif method=='rankD':
+            alpha = 5
+            w,V = eigsh(M + alpha*G, k=d)       # take a gradient step and immediately compute only top d eigenvectors and eigenvalues
+            M = V.dot(np.diag(w)).dot(V.T)      # finish projection by re-forming rank d M
+
+        else:
+            raise AssertionError("method must be either 'FW for Frank-Wolfe algorithm or 'rankD' for rank d projection algorithm")
+
+        end = time()                                    # ending time
 
         # stopping variables:
         dif = np.linalg.norm(M - M_old, ord='fro')
@@ -47,9 +61,9 @@ def frankWolfe(X0, S, maxits=100, epsilon=1e-3, debug=False):
         it += 1
 
         # check if there is any progress:
-        if it > 5:
-            smallest = min(stats['log'][::-1][:5]) # last ten guys
-            biggest = max(stats['log'][::-1][:5])  # last ten guys             
+        if it > 10:
+            smallest = min(stats['log'][::-1][:10])     # last ten iterates
+            biggest = max(stats['log'][::-1][:10])      # last ten iterates             
             if abs(smallest - biggest) < epsilon:
                 print('No progress')              
                 break
@@ -67,17 +81,18 @@ def frankWolfe(X0, S, maxits=100, epsilon=1e-3, debug=False):
     _, X = Utils.transform_MtoX(M, d)
     return X, stats 
 
+
 if __name__ == '__main__':
     n = 20
     d = 2
     Xtrue = Utils.center_data(np.random.rand(n,d))
     pulls = int(10*n*d*np.log(n))
-    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=False)
+    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=True)
     print("estiamted best error is: %f" %bayes_err)
     X0 = Utils.center_data(np.random.rand(n,d))
-    Xhat, stats = frankWolfe(X0, S, debug=True)
+    Xhat, stats = eigen_embed(X0, S, method='rankD', epsilon=1e-6, debug=True)
 
-    # _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
-    # Utils.twodplot(Xtrue, Xpro)
-    # plt.show()
+    _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
+    Utils.twodplot(Xtrue, Xpro)
+    plt.show()
 
