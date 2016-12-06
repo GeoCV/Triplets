@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt

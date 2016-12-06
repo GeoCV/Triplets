@@ -1,3 +1,4 @@
+from __future__ import division
 from ste import *
 from new_utils import *
 
@@ -39,10 +40,8 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
         # Frank-Wolfe method
         if method=='FW':        
-            alpha = 5/np.sqrt(it + 2)                      # heuristic step size
-            _, v = eigsh(-1.*G, k=1, maxiter=200)          # get largest eigenvalue
-            # _, V = np.linalg.eigh(-1.*G)
-            # v = V[:,0]       # leading eigenvector
+            alpha = 10/(it + 2)                      # heuristic step size
+            _, v = eigsh(G, k=1, maxiter=200)          # get largest eigenvalue
             M = M + alpha*(np.outer(v,v) - M)            # perform rank-1 update
 
         elif method=='rankD':
@@ -84,15 +83,21 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
 if __name__ == '__main__':
     n = 20
-    d = 2
+    d = 5
     Xtrue = Utils.center_data(np.random.rand(n,d))
     pulls = int(10*n*d*np.log(n))
-    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=True)
+    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=False)
     print("estiamted best error is: %f" %bayes_err)
     X0 = Utils.center_data(np.random.rand(n,d))
-    Xhat, stats = eigen_embed(X0, S, method='rankD', epsilon=1e-6, debug=True)
+    Xhat, stats = eigen_embed(X0, S, method='FW', epsilon=1e-6, debug=True)
 
     _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
-    Utils.twodplot(Xtrue, Xpro)
-    plt.show()
+    # Utils.twodplot(Xtrue, Xpro)
+    # plt.show()
 
+
+    # M0 = np.dot(X0, X0.T)
+    # G = ste_loss_convex(M0, S, 2, descent_alg='full_grad')
+    # w, V = np.linalg.eig(G)
+    # plt.plot(np.sort(abs(w))[::-1])
+    # plt.show()

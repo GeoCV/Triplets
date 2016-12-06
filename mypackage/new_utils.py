@@ -1,3 +1,4 @@
+from __future__ import division
 from math import exp, log
 from numpy.linalg import norm, eigh
 from numpy import mat, dot, zeros, diag
