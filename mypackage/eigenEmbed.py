@@ -44,6 +44,7 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
             _, v = eigsh(G, k=1, maxiter=200)          	# get largest eigenvalue
             M = M + alpha*(np.outer(v,v) - M)           # perform rank-1 update
 
+        # Rank D projection
         elif method=='rankD':
             alpha = 5
             w,V = eigsh(M + alpha*G, k=d)       # take a gradient step and immediately compute only top d eigenvectors and eigenvalues
@@ -95,6 +96,6 @@ if __name__ == '__main__':
     Xhat, stats = eigen_embed(X0, S, method='FW', epsilon=1e-6, debug=True)
 
     if d == 2:
-	    _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
-	    Utils.twodplot(Xtrue, Xpro)
-	    plt.show()
+        _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
+        Utils.twodplot(Xtrue, Xpro)
+        plt.show()
