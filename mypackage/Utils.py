@@ -226,38 +226,32 @@ def procrustes(X, Y, scaling=True, reflection='best'):
     return d, Z, tform
 
 def twodplot(X, Y):
-    plt.figure(1)
-    plt.subplot(131)
-
-
-def twodplot(X, Y):
     n,d = X.shape
     plt.figure(1)
-    # Plot Xtrue
-    plt.subplot(131)
-    plt.axvline(x=pow(n,-1./3))
-    plt.axhline(y=pow(n,-1./3))
-    plt.plot(*zip(*X), marker='o', color='r', ls='')
-    #plt.xlim([0,1])
-    #plt.ylim([0,1])
-    
-    # Plot Xhat
-    plt.subplot(132)
-    plt.axvline(x=pow(n,-1./3))
-    plt.axhline(y=pow(n,-1./3))
-    plt.plot(*zip(*Y), marker='o', color='b', ls='')
-    #plt.xlim([0,1])
-    #plt.ylim([0,1])
-    
-    # Overlap plot
-    plt.subplot(133)
-    plt.axvline(x=pow(n,-1./3))
-    plt.axhline(y=pow(n,-1./3))
-    plt.plot(*zip(*X), marker='o', color='r', ls='')
-    #plt.xlim([0,1])
-    #plt.ylim([0,1])
 
-    for i in range(n):
+    plt.subplot(131)                # true embedding
+    plt.axvline(x=pow(n,-1./3))
+    plt.axhline(y=pow(n,-1./3))
+    for i in range(n):              # plot the points one at a time
+        x1, x2 = X[i]
+        plt.plot(x1, x2, marker='o', color='r', ls='')
+
+    plt.subplot(132)                # learned emebdding
+    plt.axvline(x=pow(n,-1./3))
+    plt.axhline(y=pow(n,-1./3))    
+    for i in range(n):              # plot the points one at a time
+        x1, x2 = Y[i]
+        plt.plot(x1, x2, marker='o', color='b', ls='')
+
+    plt.subplot(133)                # overlap
+    plt.axvline(x=pow(n,-1./3))
+    plt.axhline(y=pow(n,-1./3))
+
+    for i in range(n):          # plot true embedding
+        x1, x2 = X[i]
+        plt.plot(x1, x2, marker='o', color='r', ls='')
+
+    for i in range(n):          # annotate each point in the true emebdding with its number
         point = X[i,:].tolist()
         if d==1:
             point = [point[0],0]
@@ -270,8 +264,12 @@ def twodplot(X, Y):
                      color='red',
                      arrowprops = dict(arrowstyle = '-',
                                        connectionstyle = 'arc3,rad=0'))
-    plt.plot(*zip(*Y), marker='o', color='b', ls='')
-    for i in range(n):
+
+    for i in range(n):      # plot learned embedding
+        x1, x2 = Y[i]
+        plt.plot(x1, x2, marker='o', color='b', ls='')
+
+    for i in range(n):      # annotate each point in the learned embedding with its number
         point = Y[i,:].tolist()
         if d==1:
             point = [point[0],0]

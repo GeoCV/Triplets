@@ -40,9 +40,9 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
         # Frank-Wolfe method
         if method=='FW':        
-            alpha = 10/(it + 2)                      # heuristic step size
-            _, v = eigsh(G, k=1, maxiter=200)          # get largest eigenvalue
-            M = M + alpha*(np.outer(v,v) - M)            # perform rank-1 update
+            alpha = 2/(it + 2)                      	#step size to guarantee a sublinear rate
+            _, v = eigsh(G, k=1, maxiter=200)          	# get largest eigenvalue
+            M = M + alpha*(np.outer(v,v) - M)           # perform rank-1 update
 
         elif method=='rankD':
             alpha = 5
@@ -75,7 +75,10 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
         stats['avg_time_per_iter'] = np.mean(stats['time_per_iter'])
 
         if debug:
-            print('iter=%d, emp_loss=%f, log_loss=%f, Gnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm, dif))
+            Mnorm = np.linalg.norm(M, ord='fro')            # norm of the Gram matrix to ensure that we do not blow up embedding
+                                                            # this is especially important for FW since the set we solve over 
+                                                            # must be compact. This ensures we can assume boundedness
+            print('iter=%d, emp_loss=%f, log_loss=%f, Gnorm=%f, Mnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm, Mnorm, dif))
     
     _, X = Utils.transform_MtoX(M, d)
     return X, stats 
@@ -83,7 +86,7 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
 if __name__ == '__main__':
     n = 20
-    d = 5
+    d = 2
     Xtrue = Utils.center_data(np.random.rand(n,d))
     pulls = int(10*n*d*np.log(n))
     S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=False)
@@ -91,13 +94,7 @@ if __name__ == '__main__':
     X0 = Utils.center_data(np.random.rand(n,d))
     Xhat, stats = eigen_embed(X0, S, method='FW', epsilon=1e-6, debug=True)
 
-    _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
-    # Utils.twodplot(Xtrue, Xpro)
-    # plt.show()
-
-
-    # M0 = np.dot(X0, X0.T)
-    # G = ste_loss_convex(M0, S, 2, descent_alg='full_grad')
-    # w, V = np.linalg.eig(G)
-    # plt.plot(np.sort(abs(w))[::-1])
-    # plt.show()
+    if d == 2:
+	    _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)
+	    Utils.twodplot(Xtrue, Xpro)
+	    plt.show()
