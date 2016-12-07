@@ -225,6 +225,10 @@ def procrustes(X, Y, scaling=True, reflection='best'):
     tform = {'rotation':T, 'scale':b, 'translation':c}
     return d, Z, tform
 
+def twodplot(X, Y):
+    plt.figure(1)
+    plt.subplot(131)
+
 
 def twodplot(X, Y):
     n,d = X.shape
