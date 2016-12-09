@@ -16,7 +16,9 @@ def ste_loss_triplet(X, q, opt):
         triplet_score = scoreX(X, q, 1)   
         return logistic_loss(triplet_score, opt)*scoreX(X,q, opt)
 
-def ste_loss(X, S, opt, descent_alg='full_grad', svrg_full_grad=None, svrg_point=None):
+def ste_loss(X, S, opt, descent_alg='full_grad',
+             svrg_full_grad=None,
+             svrg_point=None):
     
     if opt == 1:
         emp_loss = 0
@@ -35,6 +37,7 @@ def ste_loss(X, S, opt, descent_alg='full_grad', svrg_full_grad=None, svrg_point
                 'log_loss': avg_log_loss
            }
 
+    
     elif opt == 2:
         if descent_alg == 'full_grad':            
             full_grad = fullGD_X(ste_loss_triplet, X, S)    
@@ -45,13 +48,15 @@ def ste_loss(X, S, opt, descent_alg='full_grad', svrg_full_grad=None, svrg_point
             return sgd
 
         if descent_alg == 'svrg':
-
-            svrg = SVRG_X(f, X, S, full_grad=svrg_full_grad, y=svrg_point)
+            svrg = SVRG_X(ste_loss_triplet,
+                          X,
+                          S,
+                          full_grad=svrg_full_grad,
+                          y=svrg_point)
             return svrg
 
 
         return None
-
 
 #-----------------------------CONVEX-------------------------------------
 def ste_loss_triplet_gram(M, q, opt):
@@ -63,11 +68,14 @@ def ste_loss_triplet_gram(M, q, opt):
     
     # Gradient
     elif opt == 2:        
-        triplet_score = scoreM(M, q, 1)   
+        triplet_score = scoreM(M, q, 1)
+        
         return logistic_loss(triplet_score, opt)*scoreM(M,q, opt)
     
 
-def ste_loss_convex(M, S, opt, descent_alg='full_grad'):
+def ste_loss_convex(M, S, opt, descent_alg='full_grad',
+                    svrg_full_grad=None,
+                    svrg_point=None):
 
     if opt == 1:
         emp_loss = 0
@@ -97,6 +105,14 @@ def ste_loss_convex(M, S, opt, descent_alg='full_grad'):
         if descent_alg == 'sgd':            
             sgd = SGD_X(ste_loss_triplet_gram, M, S)
             return sgd
+
+        if descent_alg == 'svrg':
+            svrg = SVRG_X(ste_loss_triplet_gram,
+                          M,
+                          S,
+                          full_grad=svrg_full_grad,
+                          y=svrg_point)
+            return svrg
         
         return None
         

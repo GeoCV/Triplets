@@ -56,8 +56,15 @@ def triplet_algorithms(f,
     stats['epoch_count'] = 0
     
     X_curr = X0
+    n = len(X0)
+    
+    # FOR SVRG
     X_tilde = X0
     p_full = f(X_tilde, S, 2, descent_alg='full_grad')
+
+    if descent_alg == 'sgd':
+        iters = n*iters
+        
     print('Done')
     emp_X_curr = f(X0, S, 1)['empirical_loss']
     log_X_curr = f(X0, S, 1)['log_loss']
@@ -72,11 +79,9 @@ def triplet_algorithms(f,
 
     alpha = step_size_func #  for now constant stepsize only
 
-    n = len(X0)
 
     # EPOCHS
     for iteration in range(1,iters):    
-
         start = time.time()
 
         if descent_alg == 'sgd':
@@ -87,49 +92,48 @@ def triplet_algorithms(f,
                 
                 if debug:
                     print('Shrinking alpha', alpha)
-                    print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+                    print('EPOCH', iteration//n,'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
 
             # Get descent direction: Currently all the work for FG and sgd
             # need to fit SVRG in this frameworks
             p = f(X_curr, S, 2, descent_alg=descent_alg)
                     
         elif descent_alg == 'full_grad':
+            # Every iteration is an epoch anyway
             stats['epoch_count'] += 1
             alpha = 0.98*alpha
 
-            # Get descent direction: Currently all the work for FG and sgd
-            # need to fit SVRG in this frameworks
             p = f(X_curr, S, 2, descent_alg=descent_alg)
 
         elif descent_alg == 'svrg':
             # Need to find a new descent direction now for SVRG
             # Shrink every epoch
-
-            if iteration % n == 0:
-                # currently using the last guy from the that comes out
+            if iteration % n == 0 and iteration !=1:
+                # currently using the last guy from the that comes out               
                 X_tilde = X_curr # update the variance reduction guy
                 p_full = f(X_tilde, S, 2, descent_alg='full_grad')
                 alpha = 0.9*alpha
                 if debug:
                     # print('Here')
                     # print('Shrinking alpha', alpha)
-                    print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+                    print('EPOCH', iteration//n, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
                 
             # call the SVRG function you've written to get new direction
             # svrg(X_curr, S, p_full, X_tilde)
-            p = f(X,
+            p = f(X_curr,
                   S,
                   2,
-                  descent_alg='full_grad',
-                  svrg_full_grad= p_full,
+                  descent_alg='svrg',
+                  svrg_full_grad= -1*p_full,
                   svrg_point= X_tilde)
             
         # Make sure we get the step size correct
         flag = False
         while flag == False:
             try:
+                
                 X_new = X_curr + alpha*p
-
+        
                 if proj != None:
                     X_new = proj(X_new, d)
 
@@ -159,8 +163,8 @@ def triplet_algorithms(f,
         stats['log'].append(log_X_new)
         stats['emp'].append(emp_X_new)
                 
-        # if debug and (descent_alg=='full_grad' or descent_alg == 'svrg'):
-        #     print(iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
+        if debug and (descent_alg=='full_grad'):
+            print('EPOCH:', iteration, 'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
         
         # accuracy achieved
         if stats['emp'][-1] < epsilon:
@@ -224,16 +228,29 @@ if __name__ == '__main__':
     triplets, error = getTriplets(X, pulls)
 
     X0 = np.random.random((n,d))
+    M0 = np.array(X0 @ X0.T)
+    
     stats4= triplet_algorithms(ste_loss, 
                            triplets,
                            X0,                       
                            d,
-                           'sgd', 
+                           'svrg', 
                            0.1,
                            iters=5000,
                            epsilon = 0.01,
                            proj=None,
                            debug=True
-                          )
+    )
 
-
+    # stats2 = triplet_algorithms(ste_loss_convex,
+    #                             triplets,
+    #                             M0,
+    #                             d,
+    #                             'svrg',
+    #                             10,
+    #                             iters=500,
+    #                             epsilon = 0.01,
+    #                             proj=projected,
+    #                             debug= True
+    # )
+    

@@ -3,10 +3,10 @@ from math import exp, log
 from numpy.linalg import norm, eigh
 from numpy import mat, dot, zeros, diag
 from numpy.random import randint
-#-------------------------------------------------------------------
-# Basic loss and scoring functions
-#-------------------------------------------------------------------
 
+#-------------------------------------------------------------
+# Basic loss and scoring functions
+#-------------------------------------------------------------
 def logistic_loss(x, opt):
     
     if opt == 1:
@@ -47,6 +47,7 @@ def scoreM(M, q, opt):
     
     elif opt == 2:        
         n = M.shape[0]
+        
         # pattern for computing gradient
         H = mat([[1.,0.,-1.],
                  [ 0.,  -1.,  1.],
@@ -101,6 +102,7 @@ def SVRG_X(f, X, S, full_grad=None, y=None):
 
     q = S[ind]
 
-    return -1*(f(X, q, 2) - f(y, q, 2) + full_grad)
+    # f(X, q, 2) - f(y, q, 2) + 
+    return -1*(full_grad)
     
 
