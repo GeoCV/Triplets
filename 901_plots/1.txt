@@ -1,0 +1,9 @@
+Dimensions:3
+Number of points:30
+Pulls:3000
+
+TRAIN:  2400
+TEST:  600
+
+Comments: A relatively easy problem to solve in the triplets literature
+

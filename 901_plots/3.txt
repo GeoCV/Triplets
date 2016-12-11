@@ -1,0 +1,13 @@
+Dimensions:10 
+Number of points:100 
+Pulls:92100
+
+TRAIN:  73680
+TEST:  18420
+
+
+Conex:
+3.989963996713444
+
+Non Convex:
+0.42697772979736326

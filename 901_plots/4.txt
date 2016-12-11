@@ -1,0 +1,6 @@
+Dimensions:10 
+Number of points:100 
+Pulls:5000
+
+TRAIN:  4000
+TEST:  1000

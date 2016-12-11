@@ -1,0 +1,12 @@
+Dimensions:3
+Number of points:30
+Pulls:6120
+
+TRAIN:  4896
+TEST:  1224
+
+
+
+
+
+
