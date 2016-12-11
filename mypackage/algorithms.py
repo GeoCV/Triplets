@@ -133,9 +133,10 @@ def triplet_algorithms(f,
             try:
                 
                 X_new = X_curr + alpha*p
-        
-                if proj != None:
-                    X_new = proj(X_new, d)
+
+                # PROJECTION
+                if proj != Nnone:
+                    X_new = proj(X_new)
 
                 emp_X_new = f(X_new, S, 1)['empirical_loss']
                 log_X_new = f(X_new, S, 1)['log_loss']
@@ -250,7 +251,7 @@ if __name__ == '__main__':
     #                             10,
     #                             iters=500,
     #                             epsilon = 0.01,
-    #                             proj=projected,
+    #                             proj=projected_psd,
     #                             debug= True
     # )
     

@@ -1,6 +1,6 @@
 from __future__ import division
 from math import exp, log
-from numpy.linalg import norm, eigh
+from numpy.linalg import norm, eigh, svd
 from numpy import mat, dot, zeros, diag
 from numpy.random import randint
 
@@ -57,7 +57,24 @@ def scoreM(M, q, opt):
         G[[[x] for x in q],q] = H
         return G
 
-def projected(M, d):
+def projected_psd(M):
+
+    '''
+    Project onto psd cone
+    '''
+    n, n = M.shape
+    D, V = eigh(M)
+    perm = D.argsort()
+    bound = 0
+    for i in range(n):
+        if D[i] < bound:
+            D[i] = 0
+    M = dot(dot(V,diag(D)),V.transpose());
+    
+    return M
+
+    
+def projected_d(M, d):
     '''
     Project onto rank d psd matrices
     '''
@@ -71,9 +88,9 @@ def projected(M, d):
     M = dot(dot(V,diag(D)),V.transpose());
     return M
 
-#--------------------------------------------------
+#------------------------------------------
 # Descent methods
-#--------------------------------------------------
+#------------------------------------------
 
 def fullGD_X(f, X, S):   
     
