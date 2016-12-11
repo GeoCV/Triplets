@@ -33,15 +33,15 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
     Gnorm = float('inf')
     n, d = X0.shape
 
-    while it < maxits and (dif > epsilon and Gnorm > epsilon):
+    while it < maxits:
         start = time()                           # start time
         M_old = M
         G = ste_loss_convex(M, S, 2, descent_alg='full_grad')
 
         # Frank-Wolfe method
         if method=='FW':        
-            alpha = 2/(it + 2)                      	#step size to guarantee a sublinear rate
-            _, v = eigsh(G, k=1, maxiter=200)          	# get largest eigenvalue
+            alpha = 2/(it + 2)                      	# step size to guarantee a sublinear rate
+            _, v = eigsh(G, k=1, maxiter=20000)          # get largest eigenvalue
             M = M + alpha*(np.outer(v,v) - M)           # perform rank-1 update
 
         # Rank D projection
@@ -61,10 +61,10 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
         it += 1
 
         # check if there is any progress:
-        if it > 10:
-            smallest = min(stats['log'][::-1][:10])     # last ten iterates
-            biggest = max(stats['log'][::-1][:10])      # last ten iterates             
-            if abs(smallest - biggest) < epsilon:
+        if it > 30:
+            smallest = min(stats['log'][::-1][:20])     # last ten iterates
+            biggest = max(stats['log'][::-1][:20])      # last ten iterates             
+            if abs(smallest - biggest) < 10**-6:
                 print('No progress')              
                 break
 
@@ -75,13 +75,20 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
         stats['time_per_iter'].append(end - start)
         stats['avg_time_per_iter'] = np.mean(stats['time_per_iter'])
 
+        # if not (dif > epsilon and Gnorm > epsilon):            
+        #     break
+
+        if stats['emp'][-1] < epsilon:
+            print('Accuracy reached')
+        
         if debug:
             Mnorm = np.linalg.norm(M, ord='fro')            # norm of the Gram matrix to ensure that we do not blow up embedding
                                                             # this is especially important for FW since the set we solve over 
                                                             # must be compact. This ensures we can assume boundedness
             print('iter=%d, emp_loss=%f, log_loss=%f, Gnorm=%f, Mnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm, Mnorm, dif))
-    
+v    
     _, X = Utils.transform_MtoX(M, d)
+    
     return X, stats 
 
 

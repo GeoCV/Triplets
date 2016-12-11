@@ -65,7 +65,6 @@ def triplet_algorithms(f,
     if descent_alg == 'sgd':
         iters = n*iters
         
-    print('Done')
     emp_X_curr = f(X0, S, 1)['empirical_loss']
     log_X_curr = f(X0, S, 1)['log_loss']
 
@@ -135,8 +134,12 @@ def triplet_algorithms(f,
                 X_new = X_curr + alpha*p
 
                 # PROJECTION
-                if proj != Nnone:
-                    X_new = proj(X_new)
+                if proj != None:
+
+                    if proj == projected_psd:
+                        X_new = proj(X_new)
+                    else:
+                        X_new = proj(X_new,d)
 
                 emp_X_new = f(X_new, S, 1)['empirical_loss']
                 log_X_new = f(X_new, S, 1)['log_loss']
