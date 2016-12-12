@@ -71,6 +71,11 @@ def triplet_algorithms(f,
     stats['emp'].append(emp_X_curr)
     stats['log'].append(log_X_curr)
 
+    # stopping condition variables
+    dif = float('inf')
+    Gnorm = float('inf')
+    p = None
+
     
     # accuracy achieved
     if stats['emp'][-1] < epsilon:
@@ -80,7 +85,9 @@ def triplet_algorithms(f,
 
 
     # EPOCHS
-    for iteration in range(1,iters):    
+    for iteration in range(1,iters):
+        if dif < epsilon or Gnorm < epsilon:
+            break    
         start = time.time()
 
         if descent_alg == 'sgd':
@@ -88,7 +95,8 @@ def triplet_algorithms(f,
             if iteration %n == 0:
                 stats['epoch_count'] += 1
                 alpha = 0.9*alpha
-                
+                p_full = f(X_tilde, S, 2, descent_alg='full_grad')      # compute per epoch for exit condition
+
                 if debug:
                     print('Shrinking alpha', alpha)
                     print('EPOCH', iteration//n,'LOG ERROR', log_X_new, 'Emp error', emp_X_new)
@@ -184,31 +192,36 @@ def triplet_algorithms(f,
                 
         # No substantial increase in last ten guys
         # has to run for atleast 20 iterations
-        if iteration > 20:
-            num = 50
-            smallest = min(stats['log'][::-1][:num]) # last ten guys
-            biggest = max(stats['log'][::-1][:num])  # last ten guys             
-            if abs(smallest - biggest) < toler:
-                print('No progress')
-                stats['status'] = 0                
-                break
+        # if iteration > 20:
+        #     num = 50
+        #     smallest = min(stats['log'][::-1][:num]) # last ten guys
+        #     biggest = max(stats['log'][::-1][:num])  # last ten guys             
+        #     if abs(smallest - biggest) < toler:
+        #         print('No progress')
+        #         stats['status'] = 0                
+        #         break
         
-            # divergence : currently very ad hoc
-            smallest = min(stats['log'][::-1][:10]) # last 10 guys
-            biggest = max(stats['log'][::-1][:10])  # last 10 guys
+        #     # divergence : currently very ad hoc
+        #     smallest = min(stats['log'][::-1][:10]) # last 10 guys
+        #     biggest = max(stats['log'][::-1][:10])  # last 10 guys
 
-            smallest_ind = argmin(stats['log'][::-1][:10]) # last 10 guys
-            biggest_ind = argmax(stats['log'][::-1][:10])  # last 10 guys                
+        #     smallest_ind = argmin(stats['log'][::-1][:10]) # last 10 guys
+        #     biggest_ind = argmax(stats['log'][::-1][:10])  # last 10 guys                
 
-            # function value has changed greatly and the function is increaseing
-            if abs(smallest - biggest) > 1 and smallest_ind > biggest_ind:
-                print('Divergence')
-                stats['status'] = -1
-                break
+        #     # function value has changed greatly and the function is increaseing
+        #     if abs(smallest - biggest) > 1 and smallest_ind > biggest_ind:
+        #         print('Divergence')
+        #         stats['status'] = -1
+        #         break
 
             
         end = time.time()
         stats['time_per_iter'].append((end - start))
+        dif = np.linalg.norm(X_curr - X_new, ord='fro')
+        if descent_alg == 'svrg' or descent_alg == 'sgd':
+            Gnorm = np.linalg.norm(p_full, ord='fro')
+        else:
+            Gnorm = np.linalg.norm(p, ord='fro')
         X_curr = X_new
     
     stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(iteration+1)
@@ -222,13 +235,13 @@ def triplet_algorithms(f,
 if __name__ == '__main__':
 
     #Create data
-    dimensions= 15
-    number_of_points= 100
+    dimensions= 2
+    number_of_points= 20
 
     X = random((number_of_points, dimensions))
     X = center_data(X)
     n,d = X.shape
-    pulls = 1000
+    pulls = 10*int(number_of_points*dimensions*np.log(number_of_points))
     triplets, error = getTriplets(X, pulls)
 
     X0 = np.random.random((n,d))
@@ -238,10 +251,10 @@ if __name__ == '__main__':
                            triplets,
                            X0,                       
                            d,
-                           'svrg', 
-                           0.1,
+                           'full_grad', 
+                           10,
                            iters=5000,
-                           epsilon = 0.01,
+                           epsilon = 1e-3,
                            proj=None,
                            debug=True
     )

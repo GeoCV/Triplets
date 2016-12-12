@@ -38,6 +38,10 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
         M_old = M
         G = ste_loss_convex(M, S, 2, descent_alg='full_grad')
 
+        if dif < epsilon or Gnorm < epsilon:
+            print("Stopping condition achieved")
+            break
+
         # Frank-Wolfe method
         if method=='FW':        
             alpha = 2/(it + 2)                      	# step size to guarantee a sublinear rate
@@ -77,16 +81,13 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
         # if not (dif > epsilon and Gnorm > epsilon):            
         #     break
-
-        if stats['emp'][-1] < epsilon:
-            print('Accuracy reached')
         
         if debug:
             Mnorm = np.linalg.norm(M, ord='fro')            # norm of the Gram matrix to ensure that we do not blow up embedding
                                                             # this is especially important for FW since the set we solve over 
                                                             # must be compact. This ensures we can assume boundedness
             print('iter=%d, emp_loss=%f, log_loss=%f, Gnorm=%f, Mnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm, Mnorm, dif))
-v    
+    
     _, X = Utils.transform_MtoX(M, d)
     
     return X, stats 
