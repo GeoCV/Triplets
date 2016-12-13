@@ -8,7 +8,7 @@ import Utils
 from time import time 
 import matplotlib.pyplot as plt
 
-def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
+def eigen_embed(X0, S, alpha=600, method='rankD',maxits=100, epsilon=1e-3, debug=False):
     """
     Inputs:
     (ndarray) X0: initial embedding
@@ -32,25 +32,29 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
     dif = float('inf')
     Gnorm = float('inf')
     n, d = X0.shape
+    scale = n**2
 
+    alpha = alpha/0.98
     while it < maxits:
         start = time()                           # start time
         M_old = M
         G = ste_loss_convex(M, S, 2, descent_alg='full_grad')
 
-        if dif < epsilon or Gnorm < epsilon:
+        if dif < epsilon or Gnorm/scale < epsilon:
             print("Stopping condition achieved")
             break
 
         # Frank-Wolfe method
         if method=='FW':        
-            alpha = 2/(it + 2)                      	# step size to guarantee a sublinear rate
-            _, v = eigsh(G, k=1, maxiter=20000)          # get largest eigenvalue
+            # alpha = 10/(it + 2)                      	# step size to guarantee a sublinear rate
+            # alpha = 0.5
+            alpha=0.85*alpha
+            _, v = eigsh(G, k=1)          # get largest eigenvalue
             M = M + alpha*(np.outer(v,v) - M)           # perform rank-1 update
 
         # Rank D projection
         elif method=='rankD':
-            alpha = 5
+            alpha = 0.98*alpha
             w,V = eigsh(M + alpha*G, k=d)       # take a gradient step and immediately compute only top d eigenvectors and eigenvalues
             M = V.dot(np.diag(w)).dot(V.T)      # finish projection by re-forming rank d M
 
@@ -66,9 +70,9 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
         # check if there is any progress:
         if it > 30:
-            smallest = min(stats['log'][::-1][:20])     # last ten iterates
-            biggest = max(stats['log'][::-1][:20])      # last ten iterates             
-            if abs(smallest - biggest) < 10**-6:
+            smallest = min(stats['log'][::-1][:10])     # last ten iterates
+            biggest = max(stats['log'][::-1][:10])      # last ten iterates             
+            if abs(smallest - biggest) < 10*epsilon:
                 print('No progress')              
                 break
 
@@ -86,7 +90,7 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
             Mnorm = np.linalg.norm(M, ord='fro')            # norm of the Gram matrix to ensure that we do not blow up embedding
                                                             # this is especially important for FW since the set we solve over 
                                                             # must be compact. This ensures we can assume boundedness
-            print('iter=%d, emp_loss=%f, log_loss=%f, Gnorm=%f, Mnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm, Mnorm, dif))
+            print('iter=%d, emp_loss=%f, log_loss=%f, avg Gnorm=%.10e, Mnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm/scale, Mnorm, dif))
     
     _, X = Utils.transform_MtoX(M, d)
     
@@ -94,14 +98,20 @@ def eigen_embed(X0, S, method='rankD',maxits=100, epsilon=1e-3, debug=False):
 
 
 if __name__ == '__main__':
-    n = 20
-    d = 2
+    n = 100
+    d = 5
+    noise = True
+
     Xtrue = Utils.center_data(np.random.rand(n,d))
     pulls = int(10*n*d*np.log(n))
-    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=False)
+    S, bayes_err = Utils.getTriplets(Xtrue, pulls, noise=noise)
     print("estiamted best error is: %f" %bayes_err)
     X0 = Utils.center_data(np.random.rand(n,d))
-    Xhat, stats = eigen_embed(X0, S, method='FW', epsilon=1e-6, debug=True)
+    Xhat, stats = eigen_embed(X0, S, alpha=1, method='FW', epsilon=1.1e-6, debug=True)
+
+    triplets_test, testSet_error = Utils.getTriplets(Xtrue, pulls, noise=noise)
+    print('Test set error is: ', testSet_error)
+    print(ste_loss(Xhat, triplets_test, 1))
 
     if d == 2:
         _, Xpro, _ = Utils.procrustes(Xtrue, Xhat)

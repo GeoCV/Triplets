@@ -2,14 +2,20 @@ import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
-
 import pandas as pd
 from Utils import *
-
 from algorithms import *
 from new_utils import *
-
 from eigenEmbed import*
+import json
+
+def save(filename, stats, train_set, test_set):
+  total_dict = {'train_set': train_set,
+                'test_set':  test_set,
+                'stats': stats}
+  with open(filename, 'w') as f:
+    json.dump(total_dict, f)
+    return
 
 def predictX(X_true, X_predict, test_triplets):
     
@@ -46,14 +52,15 @@ def predictM(M_true, M_predict, test_triplets):
     return acc
 
 #Create data
-dimensions= 3
-number_of_points= 40
+np.random.seed(42)
+dimensions= 5
+number_of_points= 100
 
 X = np.random.random((number_of_points, dimensions))
 X = center_data(X)
 
 n,d = X.shape
-pulls = 10*int(number_of_points*dimensions*np.log(number_of_points))
+pulls = int(12.5*number_of_points*dimensions*np.log(number_of_points))
 # split percentage fraction of triplets are train:
 # the rest are train
 split_percentage = 0.8
@@ -71,13 +78,10 @@ print()
 print('TRAIN: ', len(triplets))
 print('TEST: ', len(test_triplets))
 
-epsilons = np.linspace(0.005, 0.1,5)[::-1]
-
 # different algorithms to compute:
 
 # Non Convex FULL GD
 print('Non convex full GD')
-exp = -1
 X0 = np.random.random((n,d))
 stats_non_convex_single_exp_full_gd = triplet_algorithms(ste_loss, 
                            triplets,
@@ -90,34 +94,34 @@ stats_non_convex_single_exp_full_gd = triplet_algorithms(ste_loss,
                            proj=None,
                            debug=True
                           )
+save('./outputs/BurerMonteiro.json', stats_non_convex_single_exp_full_gd, triplets, test_triplets)
+# # Non Convex SGD
+# print('Non convex sgd')
+# stats_non_convex_single_exp_sgd = triplet_algorithms(ste_loss, 
+#                            triplets,
+#                            X0,                       
+#                            d,
+#                            'sgd', 
+#                            0.2,
+#                            iters=5000,
+#                            epsilon = epsilons[exp],
+#                            proj=None,
+#                            debug=True
+#                           )
 
-# Non Convex SGD
-print('Non convex sgd')
-stats_non_convex_single_exp_sgd = triplet_algorithms(ste_loss, 
-                           triplets,
-                           X0,                       
-                           d,
-                           'sgd', 
-                           0.2,
-                           iters=5000,
-                           epsilon = epsilons[exp],
-                           proj=None,
-                           debug=True
-                          )
-
-# Non Convex SVRG
-print('Non cnvex svrg')
-stats_non_convex_single_exp_svrg = triplet_algorithms(ste_loss, 
-                           triplets,
-                           X0,                       
-                           d,
-                           'svrg', 
-                           0.2,
-                           iters=5000,
-                           epsilon = epsilons[exp],
-                           proj=None,
-                           debug=True
-                          )
+# # Non Convex SVRG
+# print('Non cnvex svrg')
+# stats_non_convex_single_exp_svrg = triplet_algorithms(ste_loss, 
+#                            triplets,
+#                            X0,                       
+#                            d,
+#                            'svrg', 
+#                            0.2,
+#                            iters=5000,
+#                            epsilon = epsilons[exp],
+#                            proj=None,
+#                            debug=True
+#                           )
 
 # CONVEX STE FULL GRAD Single experiment
 print('Convex STE')
@@ -132,40 +136,43 @@ stats_convex_single_exp_full_gd = triplet_algorithms(ste_loss_convex,
                        epsilon =epsilons[exp],
                        proj=projected_psd,
                        debug= True)
+save('./outputs/STE.json', stats_convex_single_exp_full_gd, triplets, test_triplets)
 
-# CONVEX STE SGD Single experiment
-print('Convex SGD')
-stats_convex_single_exp_sgd = triplet_algorithms(ste_loss_convex, 
-                       triplets,
-                       M0,                       
-                       d,                            
-                       'sgd', 
-                        1,
-                       iters=5000,
-                       epsilon =epsilons[exp],
-                       proj=projected_psd,
-                       debug= True)
+# # CONVEX STE SGD Single experiment
+# print('Convex SGD')
+# stats_convex_single_exp_sgd = triplet_algorithms(ste_loss_convex, 
+#                        triplets,
+#                        M0,                       
+#                        d,                            
+#                        'sgd', 
+#                         1,
+#                        iters=5000,
+#                        epsilon =epsilons[exp],
+#                        proj=projected_psd,
+#                        debug= True)
     
-# CONVEX STE SVRG Single experiment
-print('Convex SVRG')
-stats_convex_single_exp_svrg = triplet_algorithms(ste_loss_convex, 
-                       triplets,
-                       M0,                       
-                       d,                            
-                       'svrg', 
-                        100,
-                       iters=5000,
-                       epsilon =epsilons[exp],
-                       proj=projected_psd,
-                       debug= True)
+# # CONVEX STE SVRG Single experiment
+# print('Convex SVRG')
+# stats_convex_single_exp_svrg = triplet_algorithms(ste_loss_convex, 
+#                        triplets,
+#                        M0,                       
+#                        d,                            
+#                        'svrg', 
+#                         100,
+#                        iters=5000,
+#                        epsilon =epsilons[exp],
+#                        proj=projected_psd,
+#                        debug= True)
 
 # rank-D projection
 print('Rank D projection')
 Xhat, stats_rankD = eigen_embed(X0, triplets, method='rankD', epsilon=epsilons[exp], debug=True)
+save('./outputs/rankD.json', stats_rankD, triplets, test_triplets)
 
 # Frank-Wolfe method
 print('Frank Wolfe')
 Xhat, stats_FW = eigen_embed(X0, triplets, method='FW', epsilon=epsilons[exp], debug=True)
+save('./outputs/FW.json', stats_FW, triplets, test_triplets)
 
 # PLOTTING CODE
 
