@@ -120,7 +120,7 @@ X0 = np.random.random((n,d))
 # Frank-Wolfe method
 print('Frank Wolfe')
 Xhat, stats_FW = eigen_embed(X0, triplets, alpha=1, method='FW', epsilon=1.1e-6, debug=True)
-save('./outputs/FW_no_noise.json', stats_FW, triplets, test_triplets)
+# save('./outputs/FW_no_noise.json', stats_FW, triplets, test_triplets)
 
 # PLOTTING CODE
 

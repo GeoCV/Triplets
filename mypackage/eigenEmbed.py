@@ -48,7 +48,8 @@ def eigen_embed(X0, S, alpha=600, method='rankD',maxits=100, epsilon=1e-3, debug
         if method=='FW':        
             # alpha = 10/(it + 2)                      	# step size to guarantee a sublinear rate
             # alpha = 0.5
-            alpha=0.8*alpha
+            # alpha=0.8*alpha
+            alpha = 2/(it + 2)
             _, v = eigsh(G, k=1)          # get largest eigenvalue
             M = M + alpha*(np.outer(v,v) - M)           # perform rank-1 update
 
