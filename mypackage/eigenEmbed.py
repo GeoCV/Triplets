@@ -48,7 +48,7 @@ def eigen_embed(X0, S, alpha=600, method='rankD',maxits=100, epsilon=1e-3, debug
         if method=='FW':        
             # alpha = 10/(it + 2)                      	# step size to guarantee a sublinear rate
             # alpha = 0.5
-            alpha=0.85*alpha
+            alpha=0.8*alpha
             _, v = eigsh(G, k=1)          # get largest eigenvalue
             M = M + alpha*(np.outer(v,v) - M)           # perform rank-1 update
 
@@ -92,8 +92,10 @@ def eigen_embed(X0, S, alpha=600, method='rankD',maxits=100, epsilon=1e-3, debug
                                                             # must be compact. This ensures we can assume boundedness
             print('iter=%d, emp_loss=%f, log_loss=%f, avg Gnorm=%.10e, Mnorm=%f, dif=%f' %(it, stats['emp'][-1], stats['log'][-1], Gnorm/scale, Mnorm, dif))
     
+    print(np.linalg.matrix_rank(M))
     _, X = Utils.transform_MtoX(M, d)
-    
+    stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(it+1)
+    stats['embedding'] = X.tolist()    
     return X, stats 
 
 

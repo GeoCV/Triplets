@@ -151,8 +151,9 @@ def triplet_algorithms(f,
         Gnorm = np.linalg.norm(p, ord='fro')
         X_curr = X_new
     
+    # print(X_curr.shape, np.linalg.matrix_rank(X_curr))
     stats['avg_time_per_iter'] = sum(stats['time_per_iter'])/(iteration+1)
-    stats['embedding'] = X_curr
+    stats['embedding'] = X_curr.tolist()
 
     print('Exiting')
     
