@@ -118,8 +118,8 @@ X0 = np.random.random((n,d))
 # save('./outputs/rankD_no_noise.json', stats_rankD, triplets, test_triplets)
 
 # Frank-Wolfe method
-print('Frank Wolfe')
-Xhat, stats_FW = eigen_embed(X0, triplets, alpha=1, method='FW', epsilon=1.1e-6, debug=True)
+# print('Frank Wolfe')
+# Xhat, stats_FW = eigen_embed(X0, triplets, alpha=1, method='FW', epsilon=1.1e-6, debug=True)
 # save('./outputs/FW_no_noise.json', stats_FW, triplets, test_triplets)
 
 # PLOTTING CODE
