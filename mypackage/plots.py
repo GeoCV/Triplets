@@ -59,6 +59,8 @@ noise = True
 
 X = np.random.random((number_of_points, dimensions))
 X = center_data(X)
+np.save('./outputs/true_embedding.npy', X)
+print('Saved')
 
 n,d = X.shape
 pulls = int(12.5*number_of_points*dimensions*np.log(number_of_points))
