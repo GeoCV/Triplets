@@ -59,8 +59,8 @@ noise = True
 
 X = np.random.random((number_of_points, dimensions))
 X = center_data(X)
-np.save('./outputs/true_embedding.npy', X)
-print('Saved')
+# np.save('./outputs/true_embedding.npy', X)
+# print('Saved')
 
 n,d = X.shape
 pulls = int(12.5*number_of_points*dimensions*np.log(number_of_points))
@@ -107,17 +107,17 @@ X0 = np.random.random((n,d))
 #                        M0,                       
 #                        d,                            
 #                        'full_grad', 
-#                         600,
+#                         500,
 #                        iters=200,
 #                        epsilon =3e-7,
 #                        proj=projected_psd,
 #                        debug= True)
-# save('./outputs/STE_no_noise.json', stats_convex_single_exp_full_gd, triplets, test_triplets)
+# save('./outputs/STE_noise.json', stats_convex_single_exp_full_gd, triplets, test_triplets)
 
 # rank-D projection
-# print('Rank D projection')
-# Xhat, stats_rankD = eigen_embed(X0, triplets, alpha=800, method='rankD', epsilon=8.3e-7, debug=True)
-# save('./outputs/rankD_no_noise.json', stats_rankD, triplets, test_triplets)
+print('Rank D projection')
+Xhat, stats_rankD = eigen_embed(X0, triplets, alpha=800, method='rankD', epsilon=3e-7, debug=True)
+# save('./outputs/rankD_noise.json', stats_rankD, triplets, test_triplets)
 
 # Frank-Wolfe method
 # print('Frank Wolfe')
