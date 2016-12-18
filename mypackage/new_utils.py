@@ -107,7 +107,7 @@ def SGD_X(f, X, S):
 
     q = S[ind]
 
-    return -1*f(X, q, 2)
+    return -1.*f(X, q, 2)
 
 
 def SVRG_X(f, X, S, full_grad=None, y=None):
@@ -120,6 +120,6 @@ def SVRG_X(f, X, S, full_grad=None, y=None):
     q = S[ind]
 
     # f(X, q, 2) - f(y, q, 2) + 
-    return -1*(full_grad)
+    return -1.*(full_grad)
     
 
