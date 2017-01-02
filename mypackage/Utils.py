@@ -27,6 +27,7 @@ def transform_MtoX(M, d):
     s = np.diag(s)
     Mp = np.dot(np.dot(U.real,s),V.real.transpose())
     X = np.dot(U.real,np.sqrt(s).real)
+    
     return Mp,X[:,0:d]
 
 def center_data(X):
