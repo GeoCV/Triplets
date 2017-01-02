@@ -10,6 +10,6 @@ Jamieson.
 
 This repository was created for a class project for a topics course in
 Machine learning at University Of Wisconsin Madison. Our results is best summarised
-in the [following paper]()
+in the [following paper](https://github.com/abiswas3/Triplets/blob/master/biswasMason_Final_Project.pdf)
 
 NOTE: Completely documenting the code has been put off due to other exisiting workload.
