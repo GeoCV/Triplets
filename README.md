@@ -1,12 +1,14 @@
-# Learning on Ordinal data
+# Triplets
 
 The purpose of this repository is to perform analysis of of various
-algorithms that solve optimization routines in order to recover
-a low dimensional embedding that preserves some ordinal constraints.
+algorithms that solve the triplets probelem. In general the triplets
+problem involves recovering a low dimensional embedding, using a known
+noise function and ordinal constraints of the form, object i is closer
+to k than object j. For more details refer to [] by Lalit Jain and
+Kevin Jamieson.
 
-## Algorithm 1: Projected Gradient descent commonly known as
-   stochastic triplet embeddign
+This repository was created for a class project for a topics course in
+Machine learning at University Of Wisconsin Madison. Our results is best summarised
+in the followin paper.
 
-## Algorithm 2: Non convex entropy minimization commonly known as Crowd kernel
-
-## 
+NOTE: Completely documenting the code has been put off due to other exisiting workload.

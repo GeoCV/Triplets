@@ -8,20 +8,36 @@ from numpy.random import randint
 # Basic loss and scoring functions
 #-------------------------------------------------------------
 def logistic_loss(x, opt):
+
+    '''
+    Takes in a datapoint either computes the gradient of 
+    the logistic function with respect to that datapoint 
+    or the logistic loss
+
+    Args:
+    x: the datapoint
+    opt: 1: compute loss
+    opt: 2: compute gradient
+    '''
     
     if opt == 1:
-
-        loss = log(1 + exp(x))            
-            
+        loss = log(1 + exp(x))                        
         return loss
-    
-    
+        
     # Gradient
     elif opt == 2:
         return 1/(1+ exp(-1*x))    
 
 def scoreX(X, q, opt):
+    '''The score function returns the difference between distances of j'th
+    data point from head from i'th data point from head
     
+    This function returns score w.r.t to embdedding matrix
+    Args:
+    x: the datapoint
+    opt: 1: compute score
+    opt: 2: compute gradient of with respect to triplets    
+    '''    
     i,j,k = q[0], q[1], q[2]
     
     if opt == 1:
@@ -39,7 +55,16 @@ def scoreX(X, q, opt):
         return G
 
 def scoreM(M, q, opt):
+    '''The score function returns the difference between distances of j'th
+    data point from head from i'th data point from head
 
+    This function returns score w.r.t to gram matrix
+
+    Args:
+    x: the datapoint
+    opt: 1: compute score
+    opt: 2: compute gradient of with respect to triplets    
+    '''    
     i,j,k = q[0], q[1], q[2]
 
     if opt == 1:
