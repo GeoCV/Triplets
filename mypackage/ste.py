@@ -2,10 +2,15 @@ from __future__ import division
 from math import exp, log
 from numpy.linalg import norm
 from numpy import zeros
-from new_utils import *
+from helpers import *
 
 def ste_loss_triplet(X, q, opt):
-
+    '''
+    Definition of the STE Loss and 
+    it's gradient in terms of the embedding matrix
+    for a given triplet
+    '''
+    
     # Logistic loss of triplet score
     if opt == 1:
         triplet_score = scoreX(X, q, opt) 
@@ -19,6 +24,10 @@ def ste_loss_triplet(X, q, opt):
 def ste_loss(X, S, opt, descent_alg='full_grad',
              svrg_full_grad=None,
              svrg_point=None):
+    '''Definition of the STE Loss in terms of full embedding matrix and
+    descent direction for choice of descent algorithn
+
+    '''
     
     if opt == 1:
         emp_loss = 0
@@ -58,8 +67,14 @@ def ste_loss(X, S, opt, descent_alg='full_grad',
 
         return None
 
-#-----------------------------CONVEX-------------------------------------
+
 def ste_loss_triplet_gram(M, q, opt):
+
+    '''
+    Definition of the STE Loss and 
+    it's gradient in terms of the gram matrix
+    for a given triplet
+    '''
 
     # Logistic loss of triplet score
     if opt == 1:
@@ -76,7 +91,12 @@ def ste_loss_triplet_gram(M, q, opt):
 def ste_loss_convex(M, S, opt, descent_alg='full_grad',
                     svrg_full_grad=None,
                     svrg_point=None):
+    
+    '''Definition of the STE Loss in terms of gram matrix and
+    descent direction for choice of descent algorithm
+    '''
 
+    
     if opt == 1:
         emp_loss = 0
         log_loss = 0
